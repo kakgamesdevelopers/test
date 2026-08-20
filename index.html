@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Exam — Casa The Royal Policies</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #111118;
+            --card: #16161f;
+            --card-hover: #1c1c28;
+            --border: #2a2a3a;
+            --border-gold: rgba(201,168,76,0.25);
+            --fg: #f0e6d3;
+            --fg-muted: #8a8090;
+            --accent: #c9a84c;
+            --accent-dark: #8b6914;
+            --accent-light: #e8d48b;
+            --success: #22c55e;
+            --success-bg: rgba(34,197,94,0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239,68,68,0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245,158,11,0.1);
+            --radius: 12px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        body{
+            font-family:'Lato',sans-serif;
+            background:var(--bg);
+            color:var(--fg);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        /* Background effects */
+        .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+        .bg-effects .orb{
+            position:absolute;border-radius:50%;filter:blur(80px);opacity:0.07;
+        }
+        .bg-effects .orb1{width:500px;height:500px;background:var(--accent);top:-10%;left:-10%;animation:orbMove 20s ease-in-out infinite;}
+        .bg-effects .orb2{width:400px;height:400px;background:#6b1d2a;bottom:-10%;right:-10%;animation:orbMove 25s ease-in-out infinite reverse;}
+        .bg-effects .orb3{width:300px;height:300px;background:#2d1b4e;top:50%;left:50%;animation:orbMove 18s ease-in-out infinite 5s;}
+        @keyframes orbMove{0%,100%{transform:translate(0,0)}33%{transform:translate(40px,-30px)}66%{transform:translate(-30px,40px)}}
+
+        .noise{
+            position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size:128px 128px;
+        }
+
+        .app{position:relative;z-index:1;min-height:100vh;}
+
+        /* ===== START SCREEN ===== */
+        .screen{display:none;min-height:100vh;}
+        .screen.active{display:flex;}
+
+        #startScreen{
+            flex-direction:column;align-items:center;justify-content:center;
+            text-align:center;padding:2rem;
+        }
+        .start-icon{
+            font-size:3rem;color:var(--accent);margin-bottom:1.5rem;
+            animation:dropIn 0.8s ease-out;
+            filter:drop-shadow(0 0 30px rgba(201,168,76,0.4));
+        }
+        @keyframes dropIn{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+        .start-title{
+            font-family:'Playfair Display',serif;font-weight:900;
+            font-size:clamp(2rem,5vw,3.2rem);color:var(--accent);
+            letter-spacing:0.04em;line-height:1.15;
+            animation:fadeUp 0.8s ease-out 0.2s both;
+        }
+        .start-subtitle{
+            font-family:'Playfair Display',serif;font-weight:300;
+            font-size:clamp(0.9rem,2vw,1.2rem);color:var(--fg-muted);
+            letter-spacing:0.3em;text-transform:uppercase;margin-top:0.5rem;
+            animation:fadeUp 0.8s ease-out 0.4s both;
+        }
+        .start-divider{
+            width:120px;height:1px;margin:2rem 0;
+            background:linear-gradient(90deg,transparent,var(--accent),transparent);
+            animation:fadeUp 0.8s ease-out 0.5s both;
+        }
+        .start-info{
+            max-width:520px;color:var(--fg-muted);font-size:0.95rem;
+            line-height:1.8;margin-bottom:2.5rem;
+            animation:fadeUp 0.8s ease-out 0.6s both;
+        }
+        .start-info strong{color:var(--fg);}
+        .start-rules{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+            gap:1rem;max-width:600px;width:100%;margin-bottom:2.5rem;
+            animation:fadeUp 0.8s ease-out 0.7s both;
+        }
+        .rule-chip{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:10px;padding:1rem;display:flex;align-items:center;gap:0.7rem;
+            font-size:0.85rem;color:var(--fg-muted);
+        }
+        .rule-chip i{color:var(--accent);font-size:1rem;flex-shrink:0;}
+
+        .btn-start{
+            padding:1rem 3rem;font-family:'Playfair Display',serif;
+            font-size:1.1rem;font-weight:700;color:var(--bg);
+            background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+            border:none;border-radius:10px;cursor:pointer;
+            letter-spacing:0.05em;position:relative;overflow:hidden;
+            transition:all 0.4s;
+            animation:fadeUp 0.8s ease-out 0.9s both;
+        }
+        .btn-start::before{
+            content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);
+            transition:left 0.6s;
+        }
+        .btn-start:hover::before{left:100%;}
+        .btn-start:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(201,168,76,0.4);}
+
+        /* ===== QUIZ SCREEN ===== */
+        #quizScreen{flex-direction:column;}
+
+        /* Top Bar */
+        .quiz-topbar{
+            position:sticky;top:0;z-index:100;
+            background:rgba(10,10,15,0.92);backdrop-filter:blur(16px);
+            border-bottom:1px solid var(--border);
+            padding:0.8rem 1.5rem;
+            display:flex;align-items:center;justify-content:space-between;gap:1rem;
+            flex-wrap:wrap;
+        }
+        .topbar-left{display:flex;align-items:center;gap:1rem;}
+        .topbar-brand{
+            font-family:'Playfair Display',serif;font-weight:700;
+            font-size:0.95rem;color:var(--accent);white-space:nowrap;
+        }
+        .topbar-brand i{margin-right:0.4rem;}
+        .topbar-qcount{
+            font-size:0.8rem;color:var(--fg-muted);white-space:nowrap;
+            background:var(--card);padding:0.35rem 0.8rem;border-radius:6px;
+            border:1px solid var(--border);
+        }
+        .topbar-qcount strong{color:var(--fg);}
+
+        .timer-display{
+            display:flex;align-items:center;gap:0.6rem;
+            font-family:'Lato',sans-serif;font-weight:700;
+            font-size:1.15rem;color:var(--accent);
+            background:var(--card);padding:0.4rem 1rem;border-radius:8px;
+            border:1px solid var(--border-gold);
+            transition:all 0.3s;
+        }
+        .timer-display i{font-size:0.9rem;}
+        .timer-display.warning{color:var(--warning);border-color:rgba(245,158,11,0.4);animation:timerPulse 1s infinite;}
+        .timer-display.danger{color:var(--danger);border-color:rgba(239,68,68,0.4);animation:timerPulse 0.5s infinite;}
+        @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+        .topbar-palette-toggle{
+            display:none;background:var(--card);border:1px solid var(--border);
+            color:var(--accent);padding:0.4rem 0.8rem;border-radius:6px;
+            cursor:pointer;font-size:0.8rem;white-space:nowrap;
+        }
+
+        /* Quiz Body */
+        .quiz-body{
+            display:flex;flex:1;overflow:hidden;
+        }
+
+        /* Palette Sidebar */
+        .palette-sidebar{
+            width:260px;flex-shrink:0;
+            background:var(--bg2);border-right:1px solid var(--border);
+            padding:1.5rem;overflow-y:auto;
+            display:flex;flex-direction:column;gap:1rem;
+        }
+        .palette-title{
+            font-family:'Playfair Display',serif;font-size:0.95rem;
+            color:var(--accent);margin-bottom:0.3rem;
+        }
+        .palette-legend{
+            display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;
+        }
+        .legend-item{
+            display:flex;align-items:center;gap:0.3rem;
+            font-size:0.7rem;color:var(--fg-muted);
+        }
+        .legend-dot{
+            width:14px;height:14px;border-radius:4px;
+            border:2px solid var(--border);flex-shrink:0;
+        }
+        .legend-dot.l-current{border-color:var(--accent);background:transparent;}
+        .legend-dot.l-answered{border-color:var(--success);background:var(--success);}
+        .legend-dot.l-skipped{border-color:var(--warning);background:var(--warning);}
+        .legend-dot.l-unvisited{border-color:var(--border);background:transparent;}
+
+        .palette-grid{
+            display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+        }
+        .palette-num{
+            width:100%;aspect-ratio:1;border-radius:6px;
+            border:2px solid var(--border);background:transparent;
+            color:var(--fg-muted);font-size:0.8rem;font-weight:700;
+            cursor:pointer;transition:all 0.2s;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .palette-num:hover{border-color:var(--fg-muted);color:var(--fg);}
+        .palette-num.p-current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(201,168,76,0.2);}
+        .palette-num.p-answered{border-color:var(--success);background:var(--success);color:#fff;}
+        .palette-num.p-skipped{border-color:var(--warning);background:var(--warning);color:#000;}
+        .palette-num.p-current.p-answered{border-color:var(--accent);background:var(--success);color:#fff;box-shadow:0 0 10px rgba(34,197,94,0.3);}
+        .palette-num.p-current.p-skipped{border-color:var(--accent);background:var(--warning);color:#000;box-shadow:0 0 10px rgba(245,158,11,0.3);}
+
+        .palette-stats{
+            margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);
+            font-size:0.8rem;color:var(--fg-muted);line-height:2;
+        }
+        .palette-stats strong{color:var(--fg);}
+
+        /* Question Area */
+        .question-area{
+            flex:1;overflow-y:auto;padding:2rem;
+            display:flex;flex-direction:column;max-width:800px;margin:0 auto;width:100%;
+        }
+        .question-card{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius);padding:2rem;
+            margin-bottom:1.5rem;position:relative;overflow:hidden;
+        }
+        .question-card::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
+            background:linear-gradient(90deg,var(--accent),var(--accent-dark));
+        }
+        .q-number{
+            font-family:'Playfair Display',serif;font-size:0.8rem;
+            color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;
+            margin-bottom:0.8rem;
+        }
+        .q-text{
+            font-size:1.1rem;line-height:1.7;color:var(--fg);font-weight:400;
+        }
+
+        /* Options */
+        .options-list{display:flex;flex-direction:column;gap:0.7rem;margin-bottom:2rem;}
+        .option-btn{
+            display:flex;align-items:flex-start;gap:1rem;
+            background:var(--card);border:1px solid var(--border);
+            border-radius:10px;padding:1rem 1.2rem;cursor:pointer;
+            transition:all 0.25s;text-align:left;width:100%;
+            color:var(--fg);font-size:0.95rem;line-height:1.6;
+        }
+        .option-btn:hover{border-color:var(--border-gold);background:var(--card-hover);}
+        .option-btn.selected{
+            border-color:var(--accent);background:rgba(201,168,76,0.08);
+            box-shadow:0 0 20px rgba(201,168,76,0.08);
+        }
+        .option-letter{
+            width:32px;height:32px;flex-shrink:0;border-radius:8px;
+            background:rgba(255,255,255,0.04);border:1px solid var(--border);
+            display:flex;align-items:center;justify-content:center;
+            font-family:'Playfair Display',serif;font-weight:700;
+            font-size:0.85rem;color:var(--fg-muted);transition:all 0.25s;
+        }
+        .option-btn.selected .option-letter{
+            background:var(--accent);border-color:var(--accent);color:var(--bg);
+        }
+        .option-text{flex:1;padding-top:3px;}
+
+        /* Nav Buttons */
+        .nav-buttons{
+            display:flex;gap:0.8rem;flex-wrap:wrap;
+            margin-top:auto;padding-top:1rem;
+        }
+        .nav-btn{
+            padding:0.75rem 1.5rem;border-radius:8px;font-family:'Lato',sans-serif;
+            font-size:0.85rem;font-weight:700;cursor:pointer;
+            transition:all 0.3s;display:flex;align-items:center;gap:0.5rem;
+            letter-spacing:0.03em;text-transform:uppercase;border:none;
+        }
+        .nav-btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+        .nav-btn i{font-size:0.8rem;}
+
+        .btn-back{background:var(--card);color:var(--fg-muted);border:1px solid var(--border);}
+        .btn-back:hover:not(:disabled){background:var(--card-hover);color:var(--fg);border-color:var(--fg-muted);}
+        .btn-next{background:var(--card);color:var(--fg-muted);border:1px solid var(--border);}
+        .btn-next:hover:not(:disabled){background:var(--card-hover);color:var(--fg);border-color:var(--fg-muted);}
+        .btn-skip{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(245,158,11,0.3);}
+        .btn-skip:hover:not(:disabled){background:rgba(245,158,11,0.2);border-color:var(--warning);}
+        .btn-finish{
+            background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+            color:var(--bg);margin-left:auto;
+        }
+        .btn-finish:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 25px rgba(201,168,76,0.35);}
+
+        /* ===== CONFIRM MODAL ===== */
+        .modal-overlay{
+            position:fixed;inset:0;z-index:5000;
+            background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);
+            display:none;align-items:center;justify-content:center;padding:2rem;
+        }
+        .modal-overlay.active{display:flex;}
+        .modal-box{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:16px;max-width:440px;width:100%;padding:2rem;
+            text-align:center;position:relative;
+            animation:modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
+        .modal-icon{font-size:2.5rem;color:var(--warning);margin-bottom:1rem;}
+        .modal-box h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--fg);margin-bottom:0.8rem;}
+        .modal-box p{color:var(--fg-muted);font-size:0.9rem;margin-bottom:1.5rem;line-height:1.6;}
+        .modal-box p strong{color:var(--fg);}
+        .modal-actions{display:flex;gap:0.8rem;justify-content:center;}
+        .modal-btn{
+            padding:0.7rem 1.8rem;border-radius:8px;font-size:0.85rem;
+            font-weight:700;cursor:pointer;transition:all 0.3s;border:none;
+        }
+        .modal-btn-cancel{background:var(--card-hover);color:var(--fg-muted);border:1px solid var(--border);}
+        .modal-btn-cancel:hover{background:var(--border);color:var(--fg);}
+        .modal-btn-confirm{background:var(--danger);color:#fff;}
+        .modal-btn-confirm:hover{background:#dc2626;transform:translateY(-2px);}
+
+        /* ===== RESULT SCREEN ===== */
+        #resultScreen{
+            flex-direction:column;align-items:center;
+            padding:2rem;overflow-y:auto;
+        }
+        .result-header{
+            text-align:center;margin-bottom:2rem;padding-top:2rem;
+            animation:fadeUp 0.6s ease-out;
+        }
+        .result-header h1{
+            font-family:'Playfair Display',serif;font-weight:900;
+            font-size:clamp(1.8rem,4vw,2.8rem);color:var(--accent);
+        }
+        .result-header p{color:var(--fg-muted);margin-top:0.5rem;font-size:0.95rem;}
+
+        .score-card{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:16px;padding:2.5rem;
+            display:flex;align-items:center;gap:3rem;
+            max-width:600px;width:100%;margin-bottom:2rem;
+            animation:fadeUp 0.6s ease-out 0.2s both;
+            flex-wrap:wrap;justify-content:center;
+        }
+        .score-circle{position:relative;width:140px;height:140px;flex-shrink:0;}
+        .score-circle svg{width:100%;height:100%;transform:rotate(-90deg);}
+        .score-circle .track{fill:none;stroke:var(--border);stroke-width:8;}
+        .score-circle .fill-ring{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.5s ease-out 0.5s;}
+        .score-circle .score-text{
+            position:absolute;inset:0;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;
+        }
+        .score-circle .score-num{
+            font-family:'Playfair Display',serif;font-weight:900;
+            font-size:2.2rem;color:var(--fg);line-height:1;
+        }
+        .score-circle .score-label{font-size:0.75rem;color:var(--fg-muted);margin-top:0.2rem;}
+
+        .score-details{flex:1;min-width:200px;}
+        .score-detail-row{
+            display:flex;justify-content:space-between;align-items:center;
+            padding:0.6rem 0;border-bottom:1px solid rgba(42,42,58,0.5);
+            font-size:0.9rem;
+        }
+        .score-detail-row:last-child{border-bottom:none;}
+        .score-detail-row .sdl{color:var(--fg-muted);}
+        .score-detail-row .sdv{font-weight:700;color:var(--fg);}
+        .score-detail-row .sdv.green{color:var(--success);}
+        .score-detail-row .sdv.red{color:var(--danger);}
+        .score-detail-row .sdv.orange{color:var(--warning);}
+
+        .result-actions{
+            display:flex;gap:1rem;margin-bottom:2.5rem;flex-wrap:wrap;justify-content:center;
+            animation:fadeUp 0.6s ease-out 0.4s both;
+        }
+        .btn-pdf{
+            padding:0.9rem 2rem;border-radius:10px;font-size:0.9rem;
+            font-weight:700;cursor:pointer;transition:all 0.3s;border:none;
+            background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+            color:var(--bg);display:flex;align-items:center;gap:0.6rem;
+        }
+        .btn-pdf:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(201,168,76,0.35);}
+        .btn-review{
+            padding:0.9rem 2rem;border-radius:10px;font-size:0.9rem;
+            font-weight:700;cursor:pointer;transition:all 0.3s;
+            background:var(--card);color:var(--fg-muted);border:1px solid var(--border);
+            display:flex;align-items:center;gap:0.6rem;
+        }
+        .btn-review:hover{background:var(--card-hover);color:var(--fg);border-color:var(--fg-muted);}
+
+        /* Review Section */
+        .review-section{
+            max-width:700px;width:100%;margin-bottom:3rem;
+            animation:fadeUp 0.6s ease-out 0.5s both;
+        }
+        .review-toggle{
+            width:100%;padding:1rem;background:var(--card);border:1px solid var(--border);
+            border-radius:10px;color:var(--accent);font-family:'Playfair Display',serif;
+            font-size:1.1rem;font-weight:700;cursor:pointer;
+            display:flex;align-items:center;justify-content:space-between;
+            transition:all 0.3s;
+        }
+        .review-toggle:hover{background:var(--card-hover);border-color:var(--border-gold);}
+        .review-toggle i{transition:transform 0.3s;}
+        .review-toggle.open i{transform:rotate(180deg);}
+        .review-list{display:none;margin-top:1rem;}
+        .review-list.show{display:block;}
+
+        .review-item{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:10px;padding:1.5rem;margin-bottom:0.8rem;
+            border-left:4px solid var(--border);
+        }
+        .review-item.ri-correct{border-left-color:var(--success);}
+        .review-item.ri-wrong{border-left-color:var(--danger);}
+        .review-item.ri-skipped{border-left-color:var(--warning);}
+        .review-item .ri-head{
+            display:flex;align-items:center;justify-content:space-between;
+            margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem;
+        }
+        .ri-qnum{font-size:0.75rem;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;font-weight:700;}
+        .ri-status{
+            font-size:0.7rem;font-weight:700;padding:0.2rem 0.7rem;
+            border-radius:20px;text-transform:uppercase;letter-spacing:0.05em;
+        }
+        .ri-status.rs-correct{background:var(--success-bg);color:var(--success);}
+        .ri-status.rs-wrong{background:var(--danger-bg);color:var(--danger);}
+        .ri-status.rs-skipped{background:var(--warning-bg);color:var(--warning);}
+        .ri-text{font-size:0.93rem;color:var(--fg);margin-bottom:1rem;line-height:1.6;}
+        .ri-options{display:flex;flex-direction:column;gap:0.4rem;}
+        .ri-opt{
+            display:flex;align-items:center;gap:0.7rem;
+            padding:0.5rem 0.8rem;border-radius:6px;font-size:0.85rem;
+            color:var(--fg-muted);border:1px solid transparent;
+        }
+        .ri-opt .ri-letter{
+            width:24px;height:24px;border-radius:5px;
+            background:rgba(255,255,255,0.04);border:1px solid var(--border);
+            display:flex;align-items:center;justify-content:center;
+            font-size:0.7rem;font-weight:700;flex-shrink:0;
+        }
+        .ri-opt.ri-is-correct{background:var(--success-bg);border-color:rgba(34,197,94,0.3);color:var(--success);}
+        .ri-opt.ri-is-correct .ri-letter{background:var(--success);border-color:var(--success);color:#fff;}
+        .ri-opt.ri-is-wrong{background:var(--danger-bg);border-color:rgba(239,68,68,0.3);color:var(--danger);}
+        .ri-opt.ri-is-wrong .ri-letter{background:var(--danger);border-color:var(--danger);color:#fff;}
+        .ri-opt.ri-is-user-correct{background:var(--success-bg);border-color:rgba(34,197,94,0.2);}
+        .ri-opt.ri-is-user-correct .ri-letter{background:var(--success);border-color:var(--success);color:#fff;}
+
+        /* Toast */
+        .toast{
+            position:fixed;top:1.5rem;right:1.5rem;z-index:10000;
+            padding:0.9rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.85rem;
+            display:flex;align-items:center;gap:0.6rem;
+            transform:translateX(120%);transition:transform 0.5s cubic-bezier(0.68,-0.55,0.27,1.55);
+            box-shadow:0 10px 40px rgba(0,0,0,0.5);
+        }
+        .toast.show{transform:translateX(0);}
+        .toast-success{background:var(--success);color:#fff;}
+        .toast-info{background:var(--accent);color:var(--bg);}
+
+        /* Responsive */
+        @media(max-width:860px){
+            .palette-sidebar{
+                position:fixed;bottom:0;left:0;right:0;width:100%;
+                height:auto;max-height:50vh;border-right:none;
+                border-top:1px solid var(--border);z-index:200;
+                transform:translateY(100%);transition:transform 0.3s;
+                flex-direction:column;padding:1rem;
+            }
+            .palette-sidebar.open{transform:translateY(0);}
+            .topbar-palette-toggle{display:block;}
+            .question-area{padding:1.2rem;padding-bottom:5rem;}
+            .score-card{gap:1.5rem;padding:1.5rem;}
+            .nav-buttons{flex-wrap:wrap;}
+            .btn-finish{margin-left:0;width:100%;justify-content:center;}
+        }
+        @media(max-width:480px){
+            .quiz-topbar{padding:0.6rem 1rem;}
+            .topbar-brand{font-size:0.8rem;}
+            .timer-display{font-size:1rem;padding:0.3rem 0.7rem;}
+            .question-card{padding:1.2rem;}
+            .option-btn{padding:0.8rem 1rem;font-size:0.9rem;}
+            .nav-btn{padding:0.65rem 1rem;font-size:0.78rem;flex:1;justify-content:center;}
+            .start-rules{grid-template-columns:1fr;}
+        }
+        @media(prefers-reduced-motion:reduce){
+            *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-effects">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+</div>
+<div class="noise"></div>
+
+<!-- Toast -->
+<div class="toast toast-success" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Done</span>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3>Submit Exam?</h3>
+        <p id="confirmMsg">Are you sure you want to finish? You have <strong>0 unanswered</strong> questions remaining.</p>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" id="modalCancel">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="modalConfirm">Submit Exam</button>
+        </div>
+    </div>
+</div>
+
+<div class="app">
+
+    <!-- ===== START SCREEN ===== -->
+    <section class="screen active" id="startScreen">
+        <div class="start-icon"><i class="fa-solid fa-crown"></i></div>
+        <h1 class="start-title">Casa The Royal</h1>
+        <p class="start-subtitle">Practice Examination</p>
+        <div class="start-divider"></div>
+        <p class="start-info">
+            This practice exam covers all <strong>20 policy articles</strong> of Casa The Royal.
+            Test your knowledge of house rules, conduct policies, and property regulations.
+            Read each question carefully and select the best answer.
+        </p>
+        <div class="start-rules">
+            <div class="rule-chip"><i class="fa-solid fa-clock"></i> 30 Minutes</div>
+            <div class="rule-chip"><i class="fa-solid fa-list-ol"></i> 20 Questions</div>
+            <div class="rule-chip"><i class="fa-solid fa-check-circle"></i> 4 Options Each</div>
+            <div class="rule-chip"><i class="fa-solid fa-file-pdf"></i> Auto PDF Report</div>
+        </div>
+        <button class="btn-start" id="btnStart">Begin Examination <i class="fa-solid fa-arrow-right" style="margin-left:0.5rem;"></i></button>
+    </section>
+
+    <!-- ===== QUIZ SCREEN ===== -->
+    <section class="screen" id="quizScreen">
+        <div class="quiz-topbar">
+            <div class="topbar-left">
+                <span class="topbar-brand"><i class="fa-solid fa-crown"></i> Casa The Royal</span>
+                <span class="topbar-qcount">Question <strong id="qCurrent">1</strong> of <strong>20</strong></span>
+                <button class="topbar-palette-toggle" id="paletteToggle"><i class="fa-solid fa-grip"></i> Questions</button>
+            </div>
+            <div class="timer-display" id="timerDisplay">
+                <i class="fa-solid fa-clock"></i>
+                <span id="timerText">30:00</span>
+            </div>
+        </div>
+        <div class="quiz-body">
+            <aside class="palette-sidebar" id="paletteSidebar">
+                <div class="palette-title"><i class="fa-solid fa-grip" style="margin-right:0.4rem;"></i>Question Navigator</div>
+                <div class="palette-legend">
+                    <div class="legend-item"><div class="legend-dot l-current"></div>Current</div>
+                    <div class="legend-item"><div class="legend-dot l-answered"></div>Answered</div>
+                    <div class="legend-item"><div class="legend-dot l-skipped"></div>Skipped</div>
+                    <div class="legend-item"><div class="legend-dot l-unvisited"></div>Not Seen</div>
+                </div>
+                <div class="palette-grid" id="paletteGrid"></div>
+                <div class="palette-stats" id="paletteStats"></div>
+            </aside>
+            <main class="question-area" id="questionArea">
+                <div class="question-card">
+                    <div class="q-number" id="qNumber">Question 1</div>
+                    <div class="q-text" id="qText"></div>
+                </div>
+                <div class="options-list" id="optionsList"></div>
+                <div class="nav-buttons">
+                    <button class="nav-btn btn-back" id="btnBack" disabled><i class="fa-solid fa-arrow-left"></i> Back</button>
+                    <button class="nav-btn btn-next" id="btnNext"><i class="fa-solid fa-arrow-right"></i> Next</button>
+                    <button class="nav-btn btn-skip" id="btnSkip"><i class="fa-solid fa-forward"></i> Skip</button>
+                    <button class="nav-btn btn-finish" id="btnFinish"><i class="fa-solid fa-flag-checkered"></i> Finish</button>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- ===== RESULT SCREEN ===== -->
+    <section class="screen" id="resultScreen">
+        <div class="result-header">
+            <h1>Exam Results</h1>
+            <p id="resultSubtitle">Here is your performance summary</p>
+        </div>
+        <div class="score-card">
+            <div class="score-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="track" cx="60" cy="60" r="52"/>
+                    <circle class="fill-ring" id="scoreRing" cx="60" cy="60" r="52"
+                        stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+                </svg>
+                <div class="score-text">
+                    <div class="score-num" id="scorePercent">0%</div>
+                    <div class="score-label">Score</div>
+                </div>
+            </div>
+            <div class="score-details" id="scoreDetails"></div>
+        </div>
+        <div class="result-actions">
+            <button class="btn-pdf" id="btnPdf"><i class="fa-solid fa-file-pdf"></i> Download PDF Report</button>
+            <button class="btn-review" id="btnReviewToggle"><i class="fa-solid fa-list-check"></i> Review Answers</button>
+        </div>
+        <div class="review-section">
+            <button class="review-toggle" id="reviewToggle">
+                <span>Detailed Answer Review</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="review-list" id="reviewList"></div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    /* ===== QUESTION DATA ===== */
+    var questions = [
+        {
+            question: "What is the property valuation of Casa The Royal?",
+            options: ["$500,000", "$750,000", "$1,000,000", "$2,000,000"],
+            answer: 2
+        },
+        {
+            question: "How many bedrooms does Casa The Royal have?",
+            options: ["6 bedrooms", "8 bedrooms", "10 bedrooms", "12 bedrooms"],
+            answer: 1
+        },
+        {
+            question: "How many square feet is the estate?",
+            options: ["8,000 sq ft", "10,000 sq ft", "12,000 sq ft", "15,000 sq ft"],
+            answer: 2
+        },
+        {
+            question: "How many bathrooms are in the property?",
+            options: ["6", "8", "10", "12"],
+            answer: 2
+        },
+        {
+            question: "How many acres of land does the estate sit on?",
+            options: ["1 acre", "2 acres", "3 acres", "5 acres"],
+            answer: 2
+        },
+        {
+            question: "What is the minimum cleaning fee for smoking inside the property?",
+            options: ["$100", "$250", "$500", "$1,000"],
+            answer: 2
+        },
+        {
+            question: "Within what radius of entrances and windows is smoking prohibited?",
+            options: ["5 meters", "10 meters", "15 meters", "20 meters"],
+            answer: 1
+        },
+        {
+            question: "How quickly must any breakage be reported to the host?",
+            options: ["Within 30 minutes", "Within 1 hour", "Within 2 hours", "Within 24 hours"],
+            answer: 1
+        },
+        {
+            question: "What is the financial consequence of concealing damage?",
+            options: ["Double the repair cost", "Triple the repair cost", "Full deposit forfeiture only", "No additional penalty"],
+            answer: 1
+        },
+        {
+            question: "Which of the following smoking devices is prohibited on the property?",
+            options: ["Only traditional cigarettes", "Cigarettes and cigars only", "All forms including e-cigarettes, vapes, and hookahs", "Only combustible tobacco products"],
+            answer: 2
+        },
+        {
+            question: "What happens if a guest is found smoking on the property?",
+            options: ["A warning is issued", "Asked to leave immediately with no refund", "A $50 fine is applied", "Required to clean the affected area"],
+            answer: 1
+        },
+        {
+            question: "What type of items are strictly forbidden for wall mounting?",
+            options: ["Command strips only", "Nails, screws, sticky tapes, and all adhesives", "Only nails and screws", "Only permanent fixtures"],
+            answer: 1
+        },
+        {
+            question: "What must be cleared from shower drains after each use?",
+            options: ["Soap residue", "Hair", "Product bottles", "Nothing is required"],
+            answer: 1
+        },
+        {
+            question: "Where must shoes be removed inside the property?",
+            options: ["At the front door only", "In all rooms without exception", "In carpeted areas", "Shoes are allowed everywhere"],
+            answer: 2
+        },
+        {
+            question: "What activity is strictly prohibited on beds and sofas?",
+            options: ["Sitting", "Jumping", "Reading", "Using coasters for drinks"],
+            answer: 1
+        },
+        {
+            question: "Which open-flame items are prohibited inside the property?",
+            options: ["Only candles", "Candles, incense, and all open-flame items", "Only incense", "Only matches and lighters"],
+            answer: 1
+        },
+        {
+            question: "How should furniture be moved if necessary?",
+            options: ["Dragged carefully across the floor", "Lifted carefully", "Rolled on furniture dollies", "Furniture must not be moved under any circumstance"],
+            answer: 1
+        },
+        {
+            question: "What must a guest do if they become ill during their stay?",
+            options: ["Leave the property immediately", "Notify the host immediately and follow health protocols", "Self-medicate and rest", "Keep the illness private"],
+            answer: 1
+        },
+        {
+            question: "What is the policy regarding food waste left overnight?",
+            options: ["Allowed if in sealed containers", "Must not be left overnight; all perishables must be properly stored", "Allowed in the kitchen only", "No restrictions on food waste"],
+            answer: 1
+        },
+        {
+            question: "What type of activity is prohibited without prior written consent?",
+            options: ["Reading and relaxation", "Sleeping and resting", "Commercial activity, solicitation, and business operations", "Cooking and dining"],
+            answer: 2
+        }
+    ];
+
+    var totalQuestions = questions.length;
+    var letters = ['A', 'B', 'C', 'D'];
+
+    /* ===== STATE ===== */
+    var currentQ = 0;
+    var userAnswers = [];  /* null = not answered, 0-3 = selected option index */
+    var skippedSet = {};   /* object as set: skippedSet[i] = true */
+    var visitedSet = {};   /* object as set */
+    var timerEnd = 0;
+    var timerInterval = null;
+    var examStartTime = 0;
+    var examFinished = false;
+
+    /* ===== DOM REFS ===== */
+    var startScreen = document.getElementById('startScreen');
+    var quizScreen = document.getElementById('quizScreen');
+    var resultScreen = document.getElementById('resultScreen');
+    var btnStart = document.getElementById('btnStart');
+    var qCurrent = document.getElementById('qCurrent');
+    var timerDisplay = document.getElementById('timerDisplay');
+    var timerText = document.getElementById('timerText');
+    var paletteGrid = document.getElementById('paletteGrid');
+    var paletteStats = document.getElementById('paletteStats');
+    var paletteSidebar = document.getElementById('paletteSidebar');
+    var paletteToggle = document.getElementById('paletteToggle');
+    var qNumber = document.getElementById('qNumber');
+    var qText = document.getElementById('qText');
+    var optionsList = document.getElementById('optionsList');
+    var btnBack = document.getElementById('btnBack');
+    var btnNext = document.getElementById('btnNext');
+    var btnSkip = document.getElementById('btnSkip');
+    var btnFinish = document.getElementById('btnFinish');
+    var confirmModal = document.getElementById('confirmModal');
+    var confirmMsg = document.getElementById('confirmMsg');
+    var modalCancel = document.getElementById('modalCancel');
+    var modalConfirm = document.getElementById('modalConfirm');
+    var scoreRing = document.getElementById('scoreRing');
+    var scorePercent = document.getElementById('scorePercent');
+    var scoreDetails = document.getElementById('scoreDetails');
+    var resultSubtitle = document.getElementById('resultSubtitle');
+    var btnPdf = document.getElementById('btnPdf');
+    var btnReviewToggle = document.getElementById('btnReviewToggle');
+    var reviewToggle = document.getElementById('reviewToggle');
+    var reviewList = document.getElementById('reviewList');
+    var toastEl = document.getElementById('toast');
+    var toastMsg = document.getElementById('toastMsg');
+
+    /* ===== INIT ===== */
+    function initState() {
+        currentQ = 0;
+        userAnswers = [];
+        skippedSet = {};
+        visitedSet = {};
+        examFinished = false;
+        for (var i = 0; i < totalQuestions; i++) {
+            userAnswers.push(null);
+        }
+    }
+
+    /* ===== SCREEN SWITCHING ===== */
+    function showScreen(screen) {
+        startScreen.classList.remove('active');
+        quizScreen.classList.remove('active');
+        resultScreen.classList.remove('active');
+        screen.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    /* ===== TOAST ===== */
+    var toastTimeout = null;
+    function showToast(msg, type) {
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastMsg.textContent = msg;
+        toastEl.className = 'toast ' + (type === 'info' ? 'toast-info' : 'toast-success');
+        /* Force reflow for re-trigger */
+        void toastEl.offsetWidth;
+        toastEl.classList.add('show');
+        toastTimeout = setTimeout(function() {
+            toastEl.classList.remove('show');
+        }, 3000);
+    }
+
+    /* ===== TIMER ===== */
+    function startTimer() {
+        timerEnd = Date.now() + 30 * 60 * 1000;
+        examStartTime = Date.now();
+        updateTimerDisplay();
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+    }
+
+    function updateTimerDisplay() {
+        var remaining = Math.max(0, timerEnd - Date.now());
+        var mins = Math.floor(remaining / 60000);
+        var secs = Math.floor((remaining % 60000) / 1000);
+        timerText.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+        timerDisplay.classList.remove('warning', 'danger');
+        if (remaining <= 60000) {
+            timerDisplay.classList.add('danger');
+        } else if (remaining <= 300000) {
+            timerDisplay.classList.add('warning');
+        }
+
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            autoSubmit();
+        }
+    }
+
+    function getTimeTaken() {
+        var end = examFinished ? (timerEnd - Math.max(0, timerEnd - Date.now())) : Date.now();
+        /* Time from start to now (or to when exam ended) */
+        var taken = Date.now() - examStartTime;
+        var totalAllowed = 30 * 60 * 1000;
+        if (taken > totalAllowed) taken = totalAllowed;
+        var mins = Math.floor(taken / 60000);
+        var secs = Math.floor((taken % 60000) / 1000);
+        return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+
+    function autoSubmit() {
+        if (examFinished) return;
+        showToast('Time is up! Exam submitted automatically.', 'info');
+        finishExam();
+    }
+
+    /* ===== PALETTE ===== */
+    function buildPalette() {
+        paletteGrid.innerHTML = '';
+        for (var i = 0; i < totalQuestions; i++) {
+            var btn = document.createElement('button');
+            btn.className = 'palette-num';
+            btn.textContent = i + 1;
+            btn.setAttribute('data-index', i);
+            btn.setAttribute('aria-label', 'Go to question ' + (i + 1));
+            (function(idx) {
+                btn.addEventListener('click', function() {
+                    goToQuestion(idx);
+                });
+            })(i);
+            paletteGrid.appendChild(btn);
+        }
+    }
+
+    function updatePalette() {
+        var buttons = paletteGrid.querySelectorAll('.palette-num');
+        var answered = 0;
+        var skipped = 0;
+        var unseen = 0;
+        for (var i = 0; i < totalQuestions; i++) {
+            var cls = 'palette-num';
+            if (i === currentQ) cls += ' p-current';
+            if (userAnswers[i] !== null) {
+                cls += ' p-answered';
+                answered++;
+            } else if (skippedSet[i]) {
+                cls += ' p-skipped';
+                skipped++;
+            } else if (!visitedSet[i]) {
+                unseen++;
+            }
+            buttons[i].className = cls;
+        }
+        paletteStats.innerHTML =
+            '<div><strong>' + answered + '</strong> Answered</div>' +
+            '<div><strong>' + skipped + '</strong> Skipped</div>' +
+            '<div><strong>' + unseen + '</strong> Not Seen</div>' +
+            '<div><strong>' + (totalQuestions - answered - skipped) + '</strong> Unanswered</div>';
+    }
+
+    /* ===== RENDER QUESTION ===== */
+    function renderQuestion() {
+        var q = questions[currentQ];
+        visitedSet[currentQ] = true;
+        qNumber.textContent = 'Question ' + (currentQ + 1);
+        qCurrent.textContent = currentQ + 1;
+        qText.textContent = q.question;
+
+        optionsList.innerHTML = '';
+        for (var i = 0; i < q.options.length; i++) {
+            var btn = document.createElement('button');
+            btn.className = 'option-btn';
+            if (userAnswers[currentQ] === i) {
+                btn.classList.add('selected');
+            }
+            btn.innerHTML =
+                '<span class="option-letter">' + letters[i] + '</span>' +
+                '<span class="option-text">' + q.options[i] + '</span>';
+            (function(idx) {
+                btn.addEventListener('click', function() {
+                    selectOption(idx);
+                });
+            })(i);
+            optionsList.appendChild(btn);
+        }
+
+        /* Update nav button states */
+        btnBack.disabled = (currentQ === 0);
+        btnNext.disabled = (currentQ === totalQuestions - 1);
+        btnSkip.disabled = (currentQ === totalQuestions - 1);
+
+        updatePalette();
+
+        /* Close mobile palette if open */
+        paletteSidebar.classList.remove('open');
+    }
+
+    function selectOption(idx) {
+        if (examFinished) return;
+        userAnswers[currentQ] = idx;
+        /* Remove skipped status if answered */
+        delete skippedSet[currentQ];
+        renderQuestion();
+    }
+
+    function goToQuestion(idx) {
+        if (idx < 0 || idx >= totalQuestions || examFinished) return;
+        currentQ = idx;
+        renderQuestion();
+    }
+
+    /* ===== NAV BUTTONS ===== */
+    btnBack.addEventListener('click', function() {
+        if (currentQ > 0) {
+            currentQ--;
+            renderQuestion();
+        }
+    });
+
+    btnNext.addEventListener('click', function() {
+        if (currentQ < totalQuestions - 1) {
+            currentQ++;
+            renderQuestion();
+        }
+    });
+
+    btnSkip.addEventListener('click', function() {
+        if (currentQ < totalQuestions - 1) {
+            skippedSet[currentQ] = true;
+            /* Don't clear answer if already selected — skip just marks and moves on */
+            currentQ++;
+            renderQuestion();
+        }
+    });
+
+    btnFinish.addEventListener('click', function() {
+        if (examFinished) return;
+        var unanswered = 0;
+        for (var i = 0; i < totalQuestions; i++) {
+            if (userAnswers[i] === null) unanswered++;
+        }
+        confirmMsg.innerHTML = 'Are you sure you want to submit? You have <strong>' + unanswered + ' unanswered</strong> question' + (unanswered !== 1 ? 's' : '') + ' remaining.';
+        confirmModal.classList.add('active');
+    });
+
+    modalCancel.addEventListener('click', function() {
+        confirmModal.classList.remove('active');
+    });
+
+    modalConfirm.addEventListener('click', function() {
+        confirmModal.classList.remove('active');
+        finishExam();
+    });
+
+    /* Close modal on overlay click */
+    confirmModal.addEventListener('click', function(e) {
+        if (e.target === confirmModal) {
+            confirmModal.classList.remove('active');
+        }
+    });
+
+    /* ===== FINISH EXAM ===== */
+    function finishExam() {
+        if (examFinished) return;
+        examFinished = true;
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        showScreen(resultScreen);
+        showResults();
+    }
+
+    /* ===== RESULTS ===== */
+    function calculateScore() {
+        var correct = 0;
+        var wrong = 0;
+        var skipped = 0;
+        var unanswered = 0;
+        for (var i = 0; i < totalQuestions; i++) {
+            if (userAnswers[i] === null) {
+                if (skippedSet[i]) {
+                    skipped++;
+                } else {
+                    unanswered++;
+                }
+            } else if (userAnswers[i] === questions[i].answer) {
+                correct++;
+            } else {
+                wrong++;
+            }
+        }
+        return { correct: correct, wrong: wrong, skipped: skipped, unanswered: unanswered };
+    }
+
+    function showResults() {
+        var score = calculateScore();
+        var pct = Math.round((score.correct / totalQuestions) * 100);
+
+        /* Score ring */
+        var circumference = 2 * Math.PI * 52; /* ~326.73 */
+        var offset = circumference - (circumference * pct / 100);
+        var ringColor = pct >= 70 ? 'var(--success)' : (pct >= 40 ? 'var(--warning)' : 'var(--danger)');
+        scoreRing.style.stroke = ringColor;
+        scoreRing.style.strokeDashoffset = circumference; /* start full */
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                scoreRing.style.strokeDashoffset = offset;
+            });
+        });
+
+        /* Animate percentage number */
+        animateNumber(scorePercent, 0, pct, 1200, '%');
+
+        /* Subtitle */
+        if (pct >= 90) {
+            resultSubtitle.textContent = 'Outstanding performance! You are well prepared.';
+        } else if (pct >= 70) {
+            resultSubtitle.textContent = 'Great job! A strong understanding of the policies.';
+        } else if (pct >= 50) {
+            resultSubtitle.textContent = 'Good effort. Review the missed topics before your exam.';
+        } else {
+            resultSubtitle.textContent = 'Keep studying! Review all policies thoroughly.';
+        }
+
+        /* Details */
+        var timeTaken = getTimeTaken();
+        scoreDetails.innerHTML =
+            '<div class="score-detail-row"><span class="sdl">Total Questions</span><span class="sdv">' + totalQuestions + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Correct Answers</span><span class="sdv green">' + score.correct + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Wrong Answers</span><span class="sdv red">' + score.wrong + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Skipped</span><span class="sdv orange">' + score.skipped + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Unanswered</span><span class="sdv">' + score.unanswered + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Time Taken</span><span class="sdv">' + timeTaken + '</span></div>' +
+            '<div class="score-detail-row"><span class="sdl">Percentage</span><span class="sdv" style="color:' + ringColor + '">' + pct + '%</span></div>';
+
+        /* Build review list */
+        buildReview();
+    }
+
+    function animateNumber(el, from, to, duration, suffix) {
+        var start = performance.now();
+        function tick(now) {
+            var elapsed = now - start;
+            var progress = Math.min(elapsed / duration, 1);
+            /* Ease out cubic */
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var val = Math.round(from + (to - from) * eased);
+            el.textContent = val + (suffix || '');
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            }
+        }
+        requestAnimationFrame(tick);
+    }
+
+    /* ===== REVIEW ===== */
+    function buildReview() {
+        reviewList.innerHTML = '';
+        for (var i = 0; i < totalQuestions; i++) {
+            var q = questions[i];
+            var userAns = userAnswers[i];
+            var isCorrect = (userAns === q.answer);
+            var isSkipped = (userAns === null && skippedSet[i]);
+            var isUnanswered = (userAns === null && !skippedSet[i]);
+
+            var statusClass = 'ri-unanswered';
+            var statusText = 'Not Answered';
+            if (isCorrect) {
+                statusClass = 'ri-correct';
+                statusText = 'Correct';
+            } else if (userAns !== null) {
+                statusClass = 'ri-wrong';
+                statusText = 'Wrong';
+            } else if (isSkipped) {
+                statusClass = 'ri-skipped';
+                statusText = 'Skipped';
+            }
+
+            var item = document.createElement('div');
+            item.className = 'review-item ' + statusClass;
+
+            var optsHtml = '';
+            for (var j = 0; j < q.options.length; j++) {
+                var optClass = 'ri-opt';
+                if (j === q.answer) {
+                    optClass += ' ri-is-correct';
+                }
+                if (userAns === j && j !== q.answer) {
+                    optClass += ' ri-is-wrong';
+                }
+                if (userAns === j && j === q.answer) {
+                    optClass += ' ri-is-user-correct';
+                }
+                optsHtml += '<div class="' + optClass + '">' +
+                    '<span class="ri-letter">' + letters[j] + '</span>' +
+                    '<span>' + q.options[j] + '</span>' +
+                    '</div>';
+            }
+
+            var yourAnswerText = 'None';
+            if (userAns !== null) {
+                yourAnswerText = letters[userAns] + ') ' + q.options[userAns];
+            }
+
+            item.innerHTML =
+                '<div class="ri-head">' +
+                    '<span class="ri-qnum">Question ' + (i + 1) + '</span>' +
+                    '<span class="ri-status rs-' + statusClass.replace('ri-', '') + '">' + statusText + '</span>' +
+                '</div>' +
+                '<div class="ri-text">' + q.question + '</div>' +
+                '<div class="ri-options">' + optsHtml + '</div>';
+
+            reviewList.appendChild(item);
+        }
+    }
+
+    /* Review toggle */
+    reviewToggle.addEventListener('click', function() {
+        reviewList.classList.toggle('show');
+        reviewToggle.classList.toggle('open');
+    });
+    btnReviewToggle.addEventListener('click', function() {
+        reviewList.classList.add('show');
+        reviewToggle.classList.add('open');
+        reviewToggle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ===== PDF GENERATION ===== */
+    btnPdf.addEventListener('click', function() {
+        generatePDF();
+    });
+
+    function generatePDF() {
+        try {
+            var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+            if (!jsPDF) {
+                showToast('PDF library not loaded. Please refresh.', 'info');
+                return;
+            }
+            var doc = new jsPDF();
+            var pageW = doc.internal.pageSize.getWidth();
+            var margin = 20;
+            var maxW = pageW - margin * 2;
+            var y = margin;
+            var lineHeight = 6;
+            var score = calculateScore();
+            var pct = Math.round((score.correct / totalQuestions) * 100);
+
+            /* Helper: wrap text and return new Y */
+            function addWrappedText(text, x, startY, maxWidth, lh) {
+                var words = text.split(' ');
+                var line = '';
+                var currentY = startY;
+                for (var i = 0; i < words.length; i++) {
+                    var testLine = line + words[i] + ' ';
+                    var metrics = doc.getTextWidth(testLine);
+                    if (metrics > maxWidth && i > 0) {
+                        doc.text(line.trim(), x, currentY);
+                        line = words[i] + ' ';
+                        currentY += lh;
+                        if (currentY > 270) {
+                            doc.addPage();
+                            currentY = margin;
+                        }
+                    } else {
+                        line = testLine;
+                    }
+                }
+                doc.text(line.trim(), x, currentY);
+                return currentY + lh;
+            }
+
+            /* Title */
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.text('PRACTICE EXAM RESULTS', margin, y);
+            y += 12;
+
+            /* Divider */
+            doc.setDrawColor(201, 168, 76);
+            doc.setLineWidth(0.8);
+            doc.line(margin, y, pageW - margin, y);
+            y += 10;
+
+            /* Score summary */
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Score: ' + score.correct + '/' + totalQuestions + ' (' + pct + '%)', margin, y);
+            y += 8;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text('Correct: ' + score.correct + '   |   Wrong: ' + score.wrong + '   |   Skipped: ' + score.skipped + '   |   Unanswered: ' + score.unanswered, margin, y);
+            y += 7;
+            doc.text('Time Taken: ' + getTimeTaken() + '   |   Date: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), margin, y);
+            y += 12;
+
+            doc.setDrawColor(180, 180, 180);
+            doc.setLineWidth(0.3);
+            doc.line(margin, y, pageW - margin, y);
+            y += 10;
+
+            /* Questions */
+            for (var i = 0; i < totalQuestions; i++) {
+                var q = questions[i];
+                var userAns = userAnswers[i];
+                var isCorrect = (userAns === q.answer);
+                var isSkipped = (userAns === null && skippedSet[i]);
+                var isUnanswered = (userAns === null && !skippedSet[i]);
+
+                /* Check page space */
+                if (y > 230) {
+                    doc.addPage();
+                    y = margin;
+                }
+
+                /* Question header */
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                var statusLabel = isCorrect ? '[CORRECT]' : (userAns !== null ? '[WRONG]' : (isSkipped ? '[SKIPPED]' : '[NOT ANSWERED]'));
+                doc.text('Q' + (i + 1) + '. ' + statusLabel, margin, y);
+                y += 6;
+
+                /* Question text */
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                y = addWrappedText(q.question, margin, y, maxW, lineHeight);
+                y += 3;
+
+                /* Options */
+                for (var j = 0; j < q.options.length; j++) {
+                    if (y > 265) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    var prefix = letters[j] + ') ';
+                    var optText = prefix + q.options[j];
+
+                    /* Highlight correct answer */
+                    if (j === q.answer) {
+                        doc.setFillColor(220, 247, 220);
+                        doc.roundedRect(margin - 2, y - 4, maxW + 4, lineHeight + 2, 2, 2, 'F');
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(22, 101, 52);
+                    }
+                    /* Highlight wrong user answer */
+                    if (userAns === j && j !== q.answer) {
+                        doc.setFillColor(254, 226, 226);
+                        doc.roundedRect(margin - 2, y - 4, maxW + 4, lineHeight + 2, 2, 2, 'F');
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(153, 27, 27);
+                    }
+
+                    doc.text(optText, margin, y);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    y += lineHeight + 1;
+                }
+
+                /* Your answer line */
+                if (y > 265) {
+                    doc.addPage();
+                    y = margin;
+                }
+                var yourAnsText = 'Your Answer: ' + (userAns !== null ? (letters[userAns] + ') ' + q.options[userAns]) : 'None');
+                var correctAnsText = 'Correct Answer: ' + letters[q.answer] + ') ' + q.options[q.answer];
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text(yourAnsText + '   |   ' + correctAnsText, margin, y);
+                doc.setTextColor(0, 0, 0);
+                y += 10;
+
+                /* Separator */
+                if (i < totalQuestions - 1) {
+                    doc.setDrawColor(220, 220, 220);
+                    doc.setLineWidth(0.2);
+                    doc.line(margin, y - 4, pageW - margin, y - 4);
+                    y += 2;
+                }
+            }
+
+            /* Footer on last page */
+            y = Math.max(y + 10, 260);
+            if (y > 270) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.setDrawColor(201, 168, 76);
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageW - margin, y);
+            y += 8;
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Casa The Royal Practice Exam — Auto-generated PDF Report', margin, y);
+
+            doc.save('CasaTheRoyal_PracticeExam_Results.pdf');
+            showToast('PDF downloaded successfully!', 'success');
+
+        } catch (err) {
+            showToast('PDF generation error. Try again.', 'info');
+            /* Fallback: open print dialog */
+            window.print();
+        }
+    }
+
+    /* ===== MOBILE PALETTE TOGGLE ===== */
+    paletteToggle.addEventListener('click', function() {
+        paletteSidebar.classList.toggle('open');
+    });
+
+    /* ===== KEYBOARD SHORTCUTS ===== */
+    document.addEventListener('keydown', function(e) {
+        if (examFinished) return;
+        if (!quizScreen.classList.contains('active')) return;
+        if (confirmModal.classList.contains('active')) {
+            if (e.key === 'Escape') confirmModal.classList.remove('active');
+            return;
+        }
+
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                if (currentQ > 0) { currentQ--; renderQuestion(); }
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                if (currentQ < totalQuestions - 1) { currentQ++; renderQuestion(); }
+                break;
+            case '1': selectOption(0); break;
+            case '2': selectOption(1); break;
+            case '3': selectOption(2); break;
+            case '4': selectOption(3); break;
+        }
+    });
+
+    /* ===== START EXAM ===== */
+    btnStart.addEventListener('click', function() {
+        initState();
+        buildPalette();
+        showScreen(quizScreen);
+        renderQuestion();
+        startTimer();
+        showToast('Exam started. Good luck!', 'info');
+    });
+
+})();
+</script>
+</body>
+</html>
